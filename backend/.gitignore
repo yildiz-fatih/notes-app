@@ -1,0 +1,15 @@
+# Rider IDE
+.idea/
+*.DotSettings.user
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+
+# Build output
+**/bin/
+**/obj/
+
+# macOS Finder metadata
+.DS_Store

@@ -1,0 +1,12 @@
+# Ignore build outputs
+**/bin/
+**/obj/
+
+# Rider
+.idea/
+
+# Version control
+.gitignore
+
+# OS junk
+.DS_Store

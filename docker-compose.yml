@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: notesappuser
+      POSTGRES_PASSWORD: SpeakFriendAndEnter!
+      POSTGRES_DB: notesappdb
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "notesappuser", "-d", "notesappdb" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    ports: [ "5432:5432" ]
+    networks: [ app-net ]
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      - ConnectionStrings__Default=Host=db;Database=notesappdb;Username=notesappuser;Password=SpeakFriendAndEnter!
+    ports: [ "5001:8080" ]
+    networks: [ app-net ]
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    depends_on:
+      - backend
+    ports: [ "3000:80" ]
+    networks: [ app-net ]
+
+volumes:
+  dbdata:
+
+
+networks:
+  app-net:
