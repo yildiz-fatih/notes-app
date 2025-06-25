@@ -1,25 +1,16 @@
-import { useState, useEffect } from 'react'
-import axios from 'axios'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 
-const API = 'http://localhost:5001'
-
-function App() {
-  const [count, setCount] = useState(0)
-
-  useEffect(() => {
-    axios.get(`${API}/api/Counter`).then(res => setCount(res.data))
-  }, [])
-
-  const increment = () => {
-    axios.post(`${API}/api/Counter`).then(res => setCount(res.data))
-  }
-
+export default function App() {
   return (
-    <div>
-      <h1>Counter: {count}</h1>
-      <button onClick={increment}>Increment</button>
-    </div>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/auth/login" element={<Login />} />
+        <Route path="/auth/signup" element={<Register />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
-
-export default App

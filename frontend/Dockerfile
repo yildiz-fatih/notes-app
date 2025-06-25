@@ -21,7 +21,11 @@ WORKDIR /usr/share/nginx/html
 # clean the default nginx files
 RUN rm -rf ./*
 
+# copy the built app
 COPY --from=build /app/dist ./
+
+# copy custom nginx config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 # start nginx
