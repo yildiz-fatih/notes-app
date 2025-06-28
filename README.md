@@ -1,19 +1,20 @@
 # NotesApp
 
-A minimal full‑stack notes application:
+A minimal full‑stack notes application
 
-| Layer                | Tech                                          |
-| -------------------- | --------------------------------------------- |
-| **Frontend**         | React, Vite, Bootstrap                        |
-| **Backend**          | ASP.NET Core, Entity Framework Core, JWT auth |
-| **Database**         | PostgreSQL                                    |
-| **Containerization** | Docker + docker‑compose                       |
+| Layer                | Tech                                      |
+| -------------------- | ----------------------------------------- |
+| **Frontend**         | React, Vite, Bootstrap                    |
+| **Backend**          | ASP.NET Core, EF Core, JWT Authentication |
+| **Database**         | PostgreSQL                                |
+| **Containerization** | Docker, Docker Compose                    |
+| **Tooling**          | Adminer (Web GUI for PostgreSQL)          |
 
 ---
 
 ## Getting Started
 
-### 1. Run It (using Docker)
+### Run with Docker
 
 ```bash
 # clone the repo
@@ -24,10 +25,18 @@ cd notes-app
 docker compose up --build
 ```
 
-- Frontend -> <http://localhost:3000>
-- Backend -> <http://localhost:5001/swagger>
+- Frontend → <http://localhost:3000>
+- Backend → <http://localhost:5001/swagger>
+- Adminer (DB GUI) → <http://localhost:1234>
+  > Login to Adminer using:
+  >
+  > - System: PostgreSQL
+  > - Server: db
+  > - Username: notesappuser
+  > - Password: SpeakFriendAndEnter!
+  > - Database: notesappdb
 
-### 2. Run It (Dev Mode)
+## Run in Development Mode
 
 #### Backend
 
