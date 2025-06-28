@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using NotesApp.Api;
+using NotesApp.Business.Interfaces;
+using NotesApp.Business.Services;
 using NotesApp.Data;
 using NotesApp.Data.Entities;
 
@@ -36,6 +39,9 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
+builder.Services.AddScoped<IFolderService, FolderService>();
+builder.Services.AddScoped<INoteService, NoteService>();
+
 builder.Services.AddAuthorization();
 
 builder.Services.AddCors(options =>
@@ -63,14 +69,20 @@ var app = builder.Build();
     app.UseSwaggerUI();
 // }
 
-// Auto‐migrate on startup
+// Auto migrate and seed on startup
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();
+    
+    SeedData.EnsureDefaultUserAsync(scope.ServiceProvider)
+        .GetAwaiter()
+        .GetResult();
 }
 
 app.UseHttpsRedirection();
+
+app.UseRouting();
 
 app.UseCors();
 

@@ -8,5 +8,6 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, string>
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) {}
     
-    public DbSet<Counter> Counters { get; set; }
+    public DbSet<Folder> Folders { get; set; }
+    public DbSet<Note> Notes { get; set; }
 }

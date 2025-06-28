@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using NotesApp.Data;
 using NotesApp.Data.Entities;
 
 namespace NotesApp.Api.Controllers;
@@ -27,37 +28,50 @@ public class AuthController : ControllerBase
     private readonly UserManager<AppUser> _userManager;
     private readonly SignInManager<AppUser> _signInManager;
     private readonly IConfiguration _config;
+    private readonly AppDbContext _db;
 
     public AuthController(
         UserManager<AppUser> userManager,
         SignInManager<AppUser> signInManager,
-        IConfiguration config) {
+        IConfiguration config, AppDbContext db) {
         _userManager  = userManager;
         _signInManager = signInManager;
         _config = config;
+        _db = db;
     }
-
+    
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterDto dto) {
-        var result = await _userManager.CreateAsync(new AppUser { UserName = dto.Email, Email = dto.Email, Name = dto.Name}, dto.Password);
-        return result.Succeeded ? Ok() : BadRequest(result.Errors);
+    public async Task<IActionResult> Register([FromBody] RegisterDto dto)
+    {
+        var user = new AppUser { UserName = dto.Email, Email = dto.Email, Name = dto.Name };
+        var result = await _userManager.CreateAsync(user, dto.Password);
+
+        if (!result.Succeeded) return BadRequest(result.Errors);
+
+        // seed Default & Trash folders
+        _db.Folders.AddRange(
+            new Folder { Name = "Notes", Type = FolderType.Default, UserId = user.Id },
+            new Folder { Name = "Trash", Type = FolderType.Trash, UserId = user.Id }
+        );
+        await _db.SaveChangesAsync();
+
+        return Created();
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto dto) {
         var user = await _userManager.FindByEmailAsync(dto.Email);
         if (user == null) return Unauthorized("Invalid credentials");
-        
-        var passOk = await _signInManager.CheckPasswordSignInAsync(user, dto.Password, false);
-        if (!passOk.Succeeded) return Unauthorized("Invalid credentials");
+
+        var signInResult = await _signInManager.CheckPasswordSignInAsync(user, dto.Password, false);
+        if (!signInResult.Succeeded) return Unauthorized("Invalid credentials");
         
         var token  = new JwtSecurityToken(
             issuer: _config["Jwt:Issuer"],
             claims:
             [
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(JwtRegisteredClaimNames.Name, user.Name)
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Email, user.Email)
             ],
             expires: DateTime.UtcNow.AddHours(1),
             signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"])), SecurityAlgorithms.HmacSha256)
